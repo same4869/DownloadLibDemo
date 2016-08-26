@@ -2,16 +2,17 @@ package com.wenba.bangbang.downloadlib;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import android.R.integer;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
-import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -37,8 +38,8 @@ public class DownLoadManager {
 
 	private DownLoadManager(Context context) {
 		mContext = context;
-		mPool = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIUM_POOL_SIZE, KEEP_LIVE_TIME, TimeUnit.SECONDS,
-				new ArrayBlockingQueue<Runnable>(QUEUE_SIZE));
+		mPool = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIUM_POOL_SIZE, KEEP_LIVE_TIME, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(QUEUE_SIZE));
+		// recoverFromDb(context, "12345");
 	}
 
 	public static DownLoadManager getInstance(Context context) {
@@ -50,6 +51,25 @@ public class DownLoadManager {
 			}
 		}
 		return mInstance;
+	}
+
+	private void recoverFromDb(Context context, String userID) {
+		DownloadTaskDBHelper helper = DownloadTaskDBHelper.getInstance(context);
+		mDownLoaderList = new HashMap<String, DownLoader>();
+		List<DownLoadBean> downLoadInfos = null;
+		if (TextUtils.isEmpty(userID)) {
+			downLoadInfos = helper.findAllDownLoadInfo();
+		} else {
+			downLoadInfos = helper.findUserDownLoadInfo(userID);
+		}
+		if (downLoadInfos.size() > 0) {
+			for (int i = 0; i < downLoadInfos.size(); i++) {
+				if (downLoadInfos.get(i).getFileSize() > 0) {
+					DownLoader loader = new DownLoader(context, downLoadInfos.get(i), mPool, false);
+					mDownLoaderList.put(downLoadInfos.get(i).getTaskID(), loader);
+				}
+			}
+		}
 	}
 
 	public boolean startTask(String taskId) {
@@ -110,7 +130,7 @@ public class DownLoadManager {
 
 		Log.d(TAG, "taskId=" + taskId);
 
-		DownLoader downLoader = findTask(taskId, true);
+		DownLoader downLoader = findTask(uid, taskId, true);
 		if (downLoader == null) {
 			String fileName = path.substring(path.lastIndexOf("/") + 1);
 			String filePath = path.substring(0, path.lastIndexOf("/"));
@@ -120,7 +140,7 @@ public class DownLoadManager {
 
 			DownLoadBean info = new DownLoadBean();
 			if (TextUtils.isEmpty(uid)) {
-				uid = "12345";//UserManager.getCurUserId();
+				uid = "12345";// UserManager.getCurUserId();
 			}
 
 			info.setUserID(uid);
@@ -148,7 +168,7 @@ public class DownLoadManager {
 	}
 
 	public void deleteTask(String taskID) {
-		DownLoader loader = findTask(taskID, true);
+		DownLoader loader = findTask("12345", taskID, true);
 		if (loader != null) {
 			loader.destroy();
 		}
@@ -170,7 +190,7 @@ public class DownLoadManager {
 		unRegistReceiver();
 	}
 
-	private DownLoader findTask(String taskID, boolean fromDB) {
+	private DownLoader findTask(String uid, String taskID, boolean fromDB) {
 		if (taskID == null) {
 			return null;
 		}
@@ -181,7 +201,7 @@ public class DownLoadManager {
 
 		if (downLoader == null && fromDB) {
 			DownloadTaskDBHelper helper = DownloadTaskDBHelper.getInstance(mContext);
-			DownLoadBean downLoadInfo = helper.find(taskID);
+			DownLoadBean downLoadInfo = helper.find(uid, taskID);
 			if (downLoadInfo != null) {
 				downLoader = new DownLoader(mContext, downLoadInfo, mPool, false);
 			}
@@ -190,7 +210,7 @@ public class DownLoadManager {
 	}
 
 	public void finishCallback(String taskID) {
-		DownLoader downLoader = findTask(taskID, false);
+		DownLoader downLoader = findTask("12345", taskID, false);
 		if (downLoader != null) {
 			downLoader.removeDownLoadListener();
 		}

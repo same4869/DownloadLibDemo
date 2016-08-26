@@ -332,6 +332,7 @@ public class DownLoader {
 	private void saveDownloadInfo() {
 		if (mIsSupportBreakpoint) {
 			mSQLDownLoadInfo.setDownloadSize(mSafeDownLoadSize);
+			mSQLDownLoadInfo.setFileSize(mFileSize);
 			mHelper.save(mSQLDownLoadInfo);
 		}
 	}

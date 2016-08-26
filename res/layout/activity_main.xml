@@ -26,4 +26,10 @@
         android:layout_height="wrap_content"
         android:text="暂停下载啦" />
 
+    <Button
+        android:id="@+id/start_downlaod2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="开始下载啦2" />
+
 </LinearLayout>

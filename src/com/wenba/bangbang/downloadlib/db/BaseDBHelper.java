@@ -29,7 +29,7 @@ public abstract class BaseDBHelper<T> {
 
 	public abstract void deleteAll();
 
-	public abstract T find(String id);
+	public abstract T find(String uid, String taskId);
 
 	public abstract int getCount();
 

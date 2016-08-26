@@ -11,8 +11,8 @@ import android.util.Log;
  * @Date:2014-5-16上午10:44:01
  * @Todo:TODO
  */
-public class WenbaDatabaseHelper extends AbstractDatabaseHelper {
-	private static WenbaDatabaseHelper instance = null;
+public class MyDatabaseHelper extends AbstractDatabaseHelper {
+	private static MyDatabaseHelper instance = null;
 
 	private String databaseName = "Wenba.db";
 	private String tag = "Wenba_database";
@@ -88,17 +88,17 @@ public class WenbaDatabaseHelper extends AbstractDatabaseHelper {
 	}
 
 	private static synchronized void initSyn(Context context) {
-		instance = new WenbaDatabaseHelper(context);
+		instance = new MyDatabaseHelper(context);
 	}
 
-	public static WenbaDatabaseHelper getInstance(Context context) {
+	public static MyDatabaseHelper getInstance(Context context) {
 		if (instance == null) {
 			initSyn(context);
 		}
 		return instance;
 	}
 
-	private WenbaDatabaseHelper(Context context) {
+	private MyDatabaseHelper(Context context) {
 		this.context = context;
 	}
 

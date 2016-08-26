@@ -27,6 +27,7 @@ public final class R {
     public static final class id {
         public static final int pause_downlaod=0x7f080001;
         public static final int start_downlaod=0x7f080000;
+        public static final int start_downlaod2=0x7f080002;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
